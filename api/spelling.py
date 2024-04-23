@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from dotenv import load_dotenv
 from langchain.chat_models import AzureChatOpenAI
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
+from langchain.schema import SystemMessage, HumanMessage
 from models.text import Text
 from schemas.spelling import SpellingResponse
 
@@ -23,9 +23,9 @@ async def spelling(text: Text):
         HumanMessage(content=text.text)
     ]
 
-    response = chatgpt(messages)
+    response = chatgpt(messages).content
 
     return SpellingResponse(
         original_text=text,
-        new_text=Text(text=response.content)
+        new_text=Text(text=response)
     )
