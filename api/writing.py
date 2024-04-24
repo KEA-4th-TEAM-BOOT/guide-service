@@ -23,7 +23,9 @@ async def writing(guide: Guide):
         messages=[
             {'role': 'system', 'content': '너는 사용자들이 포스트를 잘 작성할 수 있도록 도와주는 가이드야.'},
             {'role': 'user', 'content': '주제는 ' + guide.subject},
-            {'role': 'user', 'content': '글의 길이는 ' + str(guide.length)}
+            {'role': 'user', 'content': '대상 독자층은 ' + guide.reader},
+            {'role': 'user', 'content': '글의 길이는 ' + str(guide.length)},
+            {'role': 'user', 'content': '스타일은 ' + guide.style}
         ]
     )
 
