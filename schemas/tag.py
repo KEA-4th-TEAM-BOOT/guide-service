@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from models.text import Text
+from typing import List
 
 class TagResponse(BaseModel):
-    original_text: Text
-    new_tag: Text
+    new_tag: List[str]

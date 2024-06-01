@@ -19,13 +19,14 @@ async def tag(text: Text):
                               callbacks=[StreamingStdOutCallbackHandler()])
 
     messages = [
-        SystemMessage(content='너는 입력 받은 글에서 적당한 해시태그를 추천해주는 가이드야.'),
+        SystemMessage(content='너는 입력 받은 글에서 적당한 해시태그를 추천해주는 가이드야. 키워드를 4개만 선정해서 ,로 구분해서 태그의 텍스트만 응답해줘.'),
         HumanMessage(content=text.text)
     ]
 
     response = chatgpt(messages).content
 
+    tags = [tag.strip() for tag in response.split(',')]
+
     return TagResponse(
-        original_text=text,
-        new_tag=Text(text=response)
+        new_tag = tags
     )
