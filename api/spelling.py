@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from langchain.chat_models import AzureChatOpenAI
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import SystemMessage, HumanMessage
+from core.clean import clean_html
 from models.text import Text
 from schemas.spelling import SpellingResponse
 
@@ -20,7 +21,7 @@ async def spelling(text: Text):
 
     messages = [
         SystemMessage(content='너는 입력 받은 글의 틀린 맞춤법을 수정을 도와주는 가이드야. 맞춤법을 수정한 게시물을 응답해줘.'),
-        HumanMessage(content=text.text)
+        HumanMessage(content=clean_html(text.text))
     ]
 
     response = chatgpt(messages).content
