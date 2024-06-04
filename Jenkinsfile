@@ -2,22 +2,16 @@ pipeline {
     agent any
 
     environment {
-        // 환경 변수 설정
         DOCKERHUB_USERNAME = 'codrin2'
         GITHUB_URL = 'https://github.com/KEA-4th-TEAM-BOOT/guide-service.git'
         APP_VERSION = '1.1.1'
-        BUILD_DATE = sh(script: "echo `date +%y%m%d.%H%M`", returnStdout: true).trim()
+        BUILD_DATE = sh(script: "echo `date +%y%m%d.%d%H%M`", returnStdout: true).trim()
         TAG = "${APP_VERSION}"
         IMAGE_NAME = 'voda-guide'
         SERVICE_NAME = 'guide'
-        ECR_REPOSITORY = 'voda-guide'  // AWS ECR 리포지토리 이름
-        AWS_REGION = 'ap-northeast-2'  // AWS 리전
-        AWS_ACCOUNT_ID = '981883772993'  // AWS 계정 ID
-    }
-
-    tools {
-        // Python 설정 (도구 이름은 Jenkins 설정에 따라 다를 수 있습니다)
-        python 'Python-3.9'
+        ECR_REPOSITORY = 'voda-guide'
+        AWS_REGION = 'ap-northeast-2'
+        AWS_ACCOUNT_ID = '981883772993'
     }
 
     stages {
@@ -30,19 +24,12 @@ pipeline {
             }
         }
 
-        stage('의존성 설치 및 테스트') {
-            steps {
-                sh 'pip install -r requirements.txt'
-                sh 'pytest'  // 테스트 실행, 테스트를 실행하려면 pytest를 설치하고 테스트 스크립트를 준비해야 함
-            }
-        }
-
         stage('컨테이너 빌드 및 업로드') {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'main') {
                         // DockerHub 로그인
-                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                        withCredentials([usernamePassword(credentialsId: 'docker_password', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
                             sh '''
                                 echo $PASSWORD | docker login -u $USERNAME --password-stdin
                             '''

@@ -1,5 +1,5 @@
 # 공식 Python 런타임 이미지를 베이스 이미지로 사용
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 # 컨테이너 내 작업 디렉토리 설정
 WORKDIR /usr/src/app
