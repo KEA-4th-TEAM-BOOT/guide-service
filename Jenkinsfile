@@ -31,7 +31,8 @@ pipeline {
                     // Docker를 사용하여 의존성 설치 및 테스트 실행
                     sh """
                     docker run --rm -v \$(pwd):/app -w /app ${DOCKER_IMAGE} sh -c '
-                        pip install -r requirements.txt &&
+                        pip install --no-cache-dir -r requirements.txt &&
+                        pip install pytest &&
                         pytest
                     '
                     """
