@@ -41,20 +41,38 @@ pipeline {
     steps {
         script {
             if (env.BRANCH_NAME == 'main') {
-                docker.withRegistry('', 'dockerhub-credentials') {
-                    def customImage = docker.build("${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}")
-                    customImage.push()
+                // DockerHub 로그인
+                withCredentials([usernamePassword(credentialsId: 'docker_password', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                    sh '''
+                        echo $PASSWORD | docker login -u $USERNAME --password-stdin
+                    '''
                 }
-            } else if (env.BRANCH_NAME == 'prod') {
-                withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
-                    sh """#!/bin/bash
-                        aws ecr get-login --no-include-email | sed 's|^docker login -u AWS -p \\(.*\\)https://|docker login -u AWS -p \\1 |'
-                    """
 
-                    def customImage = docker.build("${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${TAG}")
-                    customImage.push("${TAG}")
-                    customImage.push("latest")
+                // DockerHub에 이미지 빌드 및 푸시
+                sh "docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG} ."
+                sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}"
+
+                // 로컬 Docker 이미지 삭제
+                sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}"
+            } else if (env.BRANCH_NAME == 'prod') {
+                // AWS ECR 로그인
+                withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'), string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh '''
+                        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                    '''
                 }
+
+                // AWS ECR에 이미지 빌드 및 푸시
+                sh "docker build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${TAG} ."
+                sh "docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
+                sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${TAG}"
+                sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
+
+                // 로컬 Docker 이미지 삭제
+                sh "docker rmi ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${TAG}"
+                sh "docker rmi ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
             }
         }
     }
