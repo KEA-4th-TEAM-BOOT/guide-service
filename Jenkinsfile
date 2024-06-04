@@ -17,7 +17,7 @@ pipeline {
 
     tools {
         // Python 설정 (도구 이름은 Jenkins 설정에 따라 다를 수 있습니다)
-        python 'Python-3.9'
+        python 'Python-3.10'
     }
 
     stages {
