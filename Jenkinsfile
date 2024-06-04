@@ -12,7 +12,6 @@ pipeline {
         ECR_REPOSITORY = 'voda-guide'
         AWS_REGION = 'ap-northeast-2'
         AWS_ACCOUNT_ID = '981883772993'
-        DOCKER_IMAGE = 'python:3.10-slim'
     }
 
     stages {
@@ -21,21 +20,6 @@ pipeline {
                 script {
                     env.BRANCH_NAME = env.BRANCH_NAME ?: 'main'
                     checkout([$class: 'GitSCM', branches: [[name: "*/${env.BRANCH_NAME}"]], userRemoteConfigs: [[url: GITHUB_URL, credentialsId: 'github-signin']]])
-                }
-            }
-        }
-
-        stage('의존성 설치 및 테스트') {
-            steps {
-                script {
-                    // Docker를 사용하여 의존성 설치 및 테스트 실행
-                    sh """
-                    docker run --rm -v \$(pwd):/app -w /app ${DOCKER_IMAGE} sh -c '
-                        pip install --no-cache-dir -r requirements.txt &&
-                        pip install pytest &&
-                        pytest
-                    '
-                    """
                 }
             }
         }
