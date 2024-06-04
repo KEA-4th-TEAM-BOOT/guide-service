@@ -43,7 +43,7 @@ pipeline {
                         sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}"
                     } else if (env.BRANCH_NAME == 'prod') {
                         // AWS ECR 로그인
-                        withCredentials([string(credentialsId: 'aws-credentials', variable: 'AWS_ACCESS_KEY_ID'), string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'), string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
                             sh '''
                                 aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
                                 aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
