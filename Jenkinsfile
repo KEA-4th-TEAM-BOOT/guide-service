@@ -29,7 +29,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'main') {
                         // DockerHub 로그인
-                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                        withCredentials([usernamePassword(credentialsId: 'docker_password', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
                             sh '''
                                 echo $PASSWORD | docker login -u $USERNAME --password-stdin
                             '''
