@@ -47,7 +47,10 @@ pipeline {
                 }
             } else if (env.BRANCH_NAME == 'prod') {
                 withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
-                    sh "$(aws ecr get-login --no-include-email)"
+                    sh """#!/bin/bash
+                        aws ecr get-login --no-include-email | sed 's|^docker login -u AWS -p \\(.*\\)https://|docker login -u AWS -p \\1 |'
+                    """
+
                     def customImage = docker.build("${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${TAG}")
                     customImage.push("${TAG}")
                     customImage.push("latest")
