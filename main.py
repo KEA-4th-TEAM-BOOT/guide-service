@@ -9,16 +9,14 @@ app = FastAPI()
 
 port = int(os.environ.get("GUIDE_PORT", 8003))
 
-origins = [
-    "*",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,  # cross-origin request에서 cookie를 포함할 것인지 (default=False)
-    allow_methods=[""],     # cross-origin request에서 허용할 method들을 나타냄. (default=['GET']
-    allow_headers=["*"],     # cross-origin request에서 허용할 HTTP Header 목록
+    allow_credentials=True,
+    allow_methods=["*"],  # 모든 HTTP 메소드 허용
+    allow_headers=["*"],  # 모든 HTTP 헤더 허용
 )
 
 app.include_router(spelling.router)
