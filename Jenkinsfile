@@ -28,11 +28,18 @@ pipeline {
         stage('의존성 설치 및 테스트') {
             steps {
                 script {
-                    docker.withRegistry('', 'dockerhub-credentials') {
-                        def customImage = docker.build("${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}")
-                        customImage.run()
+                    withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'), string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'), string(credentialsId: 'aws-region', variable: 'AWS_REGION'), string(credentialsId: 'aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
+                        sh '''
+                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                            
+                            def customImage = docker.build("$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG")
+                            customImage.push()
+                        '''
+                        
+                        sh 'pytest'
                     }
-                    sh 'pytest'
                 }
             }
         }
